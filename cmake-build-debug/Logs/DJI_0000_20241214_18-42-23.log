@@ -1,0 +1,13 @@
+[0.005][core]-[Info]-[DjiCore_Init:106) Payload SDK Version : V3.9.2-beta.0-build.2125
+[0.006][utils]-[Debug]-[DjiCore_RootTask:131) work execution time:
+[0.006][utils]-[Debug]-[DjiCore_RootTask:132) name	                execution time (ms)	  max execution time (ms)
+[0.006][utils]-[Debug]-[DjiCore_RootTask:134) recorderWork                    	0       	0       
+[0.006][utils]-[Debug]-[DjiCore_RootTask:134) flowControllerTask              	0       	0       
+[1.069][utils]-[Debug]-[DjiCore_RootTask:131) work execution time:
+[1.069][utils]-[Debug]-[DjiCore_RootTask:132) name	                execution time (ms)	  max execution time (ms)
+[1.069][utils]-[Debug]-[DjiCore_RootTask:134) recorderWork                    	0       	0       
+[1.069][utils]-[Debug]-[DjiCore_RootTask:134) flowControllerTask              	0       	0       
+[2.132][utils]-[Debug]-[DjiCore_RootTask:131) work execution time:
+[2.132][utils]-[Debug]-[DjiCore_RootTask:132) name	                execution time (ms)	  max execution time (ms)
+[2.132][utils]-[Debug]-[DjiCore_RootTask:134) recorderWork                    	0       	0       
+[2.132][utils]-[Debug]-[DjiCore_RootTask:134) flowControllerTask              	0       	0       

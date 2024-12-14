@@ -58,32 +58,46 @@ else ()
     message(STATUS "Did not find OpenCV in the system, image data is inside RecvContainer as raw data")
 endif ()
 
-find_package(FFMPEG REQUIRED)
-if (FFMPEG_FOUND)
-    message(STATUS "Found FFMPEG installed in the system")
-    message(STATUS " - Includes: ${FFMPEG_INCLUDE_DIR}")
-    message(STATUS " - Libraries: ${FFMPEG_LIBRARIES}")
-
-    EXECUTE_PROCESS(COMMAND ffmpeg -version
-            OUTPUT_VARIABLE ffmpeg_version_output
-            OUTPUT_STRIP_TRAILING_WHITESPACE
-            )
-    string(REGEX MATCH "version.*Copyright" ffmpeg_version_line ${ffmpeg_version_output})
-    string(REGEX MATCH " .* " ffmpeg_version ${ffmpeg_version_line})
-    string(REGEX MATCH "^ 5.*$" ffmpeg_major_version ${ffmpeg_version})
-
-    if (HEAD${ffmpeg_major_version} STREQUAL "HEAD")
-        message(STATUS " - Version: ${ffmpeg_version}")
-    else ()
-        message(FATAL_ERROR " - Not support FFMPEG version: ${ffmpeg_major_version}, please install 4.x.x instead.")
-    endif ()
-
-    target_link_libraries(${PROJECT_NAME} ${FFMPEG_LIBRARIES})
-    include_directories(${FFMPEG_INCLUDE_DIR})
-    add_definitions(-DFFMPEG_INSTALLED)
+find_package(nlohmann_json REQUIRED)
+if (nlohmann_json)
+    target_link_libraries(${PROJECT_NAME} nlohmann_json::nlohmann_json)
 else ()
-    message(STATUS "Cannot Find FFMPEG")
-endif (FFMPEG_FOUND)
+    message(STATUS "Cannot Find nlohmann_json")
+endif (nlohmann_json)
+
+find_package(PahoMqttCpp REQUIRED)
+if (PahoMqttCpp_FOUND)
+    target_link_libraries(${PROJECT_NAME} PahoMqttCpp::paho-mqttpp3)
+else ()
+    message(STATUS "Cannot find Paho MQTT")
+endif ()
+
+#find_package(FFMPEG REQUIRED)
+#if (FFMPEG_FOUND)
+#    message(STATUS "Found FFMPEG installed in the system")
+#    message(STATUS " - Includes: ${FFMPEG_INCLUDE_DIR}")
+#    message(STATUS " - Libraries: ${FFMPEG_LIBRARIES}")
+#
+#    EXECUTE_PROCESS(COMMAND ffmpeg -version
+#            OUTPUT_VARIABLE ffmpeg_version_output
+#            OUTPUT_STRIP_TRAILING_WHITESPACE
+#            )
+#    string(REGEX MATCH "version.*Copyright" ffmpeg_version_line ${ffmpeg_version_output})
+#    string(REGEX MATCH " .* " ffmpeg_version ${ffmpeg_version_line})
+#    string(REGEX MATCH "^ 5.*$" ffmpeg_major_version ${ffmpeg_version})
+#
+#    if (HEAD${ffmpeg_major_version} STREQUAL "HEAD")
+#        message(STATUS " - Version: ${ffmpeg_version}")
+#    else ()
+#        message(FATAL_ERROR " - Not support FFMPEG version: ${ffmpeg_major_version}, please install 4.x.x instead.")
+#    endif ()
+#
+#    target_link_libraries(${PROJECT_NAME} ${FFMPEG_LIBRARIES})
+#    include_directories(${FFMPEG_INCLUDE_DIR})
+#    add_definitions(-DFFMPEG_INSTALLED)
+#else ()
+#    message(STATUS "Cannot Find FFMPEG")
+#endif (FFMPEG_FOUND)
 
 include_directories(${CMAKE_CURRENT_LIST_DIR}/../../../../../psdk_lib/include)
 
@@ -126,3 +140,5 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${OpenCV_INCLUDE_DIRS})
 if (OpenCV_FOUND)
     target_link_libraries(${PROJECT_NAME} ${OpenCV_LIBS})
 endif ()
+message(STATUS "--> Success <--")
+
