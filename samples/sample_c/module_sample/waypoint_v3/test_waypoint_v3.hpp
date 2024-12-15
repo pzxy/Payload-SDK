@@ -34,6 +34,8 @@
 #include <random>
 #include <string>
 #include <mqtt/async_client.h>
+#include <nlohmann/json.hpp>
+#include <chrono>
 
 static std::string generateRandomString(size_t length) {
     const std::string characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -68,14 +70,45 @@ static void *DjiTest_WaypointV3RunSampleTask(void *arg) {
             cli.subscribe(TOPIC, QOS)->wait();
         cout << "OK" << endl;
         cout << "Waiting for messages on topic: '" << TOPIC << "'" << endl;
+//        T_DjiReturnCode returnCode;
+//        T_DjiOsalHandler *osalHandler = DjiPlatform_GetOsalHandler();
+//        T_DjiFcSubscriptionFlightStatus flightStatus = 0;
+//        T_DjiDataTimestamp flightStatusTimestamp = {0};
         while (true) {
             auto msg = cli.consume_message();
             if (!msg) break;
             cout << msg->get_topic() << ": " << msg->to_string() << endl;
-            //    T_DjiReturnCode returnCode;
-            //    T_DjiOsalHandler *osalHandler = DjiPlatform_GetOsalHandler();
-            //    T_DjiFcSubscriptionFlightStatus flightStatus = 0;
-            //    T_DjiDataTimestamp flightStatusTimestamp = {0};
+            nlohmann::json j = nlohmann::json::parse(msg->get_payload());
+            std::string method = j["method"];
+            if (method == "waypoint_v3_action") {
+                nlohmann::json data = j["data"];
+                int waypoint_action = data["waypoint_action"];
+                cout << waypoint_action << endl;
+                switch (waypoint_action) {
+                    case 0:
+                        break;
+                    case 1:
+                        break;
+                    case 2:
+                        break;
+                    case 3:
+                        break;
+                    default:
+                        cout << "invalid waypoint action" << endl;
+                }
+                std::chrono::milliseconds milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+                nlohmann::json ret_json = {
+                        {"tid", j["tid"]},
+                        {"bid", j["bid"]},
+                        {"timestamp", milliseconds.count()}, // 使用函数返回值作为表达式
+                        {"gateway", "xxx"},
+                        {"method", "waypoint_v3_action"},
+                        {"data", {
+                                        {"result", 0}
+                                }}
+                };
+                cli.publish("thing/edge/xxx/services_reply",ret_json.dump(4));
+            }
         }
         if (cli.is_connected()) {
             cout << "\nShutting down and disconnecting from the MQTT server..." << flush;
