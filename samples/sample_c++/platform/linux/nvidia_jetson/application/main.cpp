@@ -42,23 +42,22 @@ static T_DjiTaskHandle s_waypointV3TaskHandle;
 /* Exported functions definition ---------------------------------------------*/
 int main(int argc, char **argv)
 {
-    DjiTest_WaypointV3RunSampleTask(nullptr);
-//    Application application(argc, argv);
-//    char inputChar;
-//    T_DjiOsalHandler *osalHandler = DjiPlatform_GetOsalHandler();
-//    T_DjiReturnCode returnCode;
-//    T_DjiTestApplyHighPowerHandler applyHighPowerHandler;
-//    returnCode = osalHandler->TaskCreate("s_waypointV3TaskHandle", DjiTest_WaypointV3RunSampleTask,
-//                                         4096, NULL,
-//                                         &s_waypointV3TaskHandle);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Create waypoint v3 task failed, errno = 0x%08llX", returnCode);
-//        return returnCode;
-//    }
-//    while (true) {
-//        cout << "start success" << endl;
-//        osalHandler->TaskSleepMs(100000);
-//    }
+    Application application(argc, argv);
+    char inputChar;
+    T_DjiOsalHandler *osalHandler = DjiPlatform_GetOsalHandler();
+    T_DjiReturnCode returnCode;
+    T_DjiTestApplyHighPowerHandler applyHighPowerHandler;
+    returnCode = osalHandler->TaskCreate("s_waypointV3TaskHandle", DjiTest_WaypointV3RunSampleTask,
+                                         4096, nullptr,
+                                         &s_waypointV3TaskHandle);
+    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+        USER_LOG_ERROR("Create waypoint v3 task failed, errno = 0x%08llX", returnCode);
+        return returnCode;
+    }
+    while (true) {
+        cout << "...main..." << endl;
+        osalHandler->TaskSleepMs(100000);
+    }
 //start:
 //    std::cout
 //        << "\n"
