@@ -1,5 +1,6 @@
-cmake_minimum_required(VERSION 2.8)
-
+cmake_minimum_required(VERSION 3.10)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_TOOLCHAIN_FILE "/home/nvidia/Workspace/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "Vcpkg toolchain file")
 if (NOT USE_SYSTEM_ARCH)
     # select use platform 'LINUX' or 'RTOS' here, reset cache and reload cmake project
     set(USE_SYSTEM_ARCH LINUX)
@@ -16,7 +17,6 @@ if (USE_SYSTEM_ARCH MATCHES RTOS)
     set(SIZE arm-none-eabi-size)
     set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 endif ()
-
 project(entry)
 
 # Disable in-source builds to prevent source tree corruption.

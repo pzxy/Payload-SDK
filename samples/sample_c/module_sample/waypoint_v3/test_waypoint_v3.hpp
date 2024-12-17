@@ -36,6 +36,10 @@
 #include <mqtt/async_client.h>
 #include <nlohmann/json.hpp>
 #include <chrono>
+#include <miniocpp/client.h>
+#include <fstream>
+
+using namespace std;
 
 static std::string generateRandomString(size_t length) {
     const std::string characters = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -50,17 +54,58 @@ static std::string generateRandomString(size_t length) {
     return randomString;
 }
 
-using namespace std;
+
+class MyError : public std::error_category {
+public:
+    const char *name() const noexcept override {
+        return "MyError";
+    }
+
+    std::string message(int ev) const override {
+        // 将错误代码转换为可读的错误消息
+        return "My error code " + std::to_string(ev);
+    }
+};
+
+static std::string downloadObject(std::string const &object) {
+    minio::s3::BaseUrl base_url{"192.168.2.159:30092", false};
+    minio::creds::StaticProvider provider{
+            "lOA5v9mXMLKIjRvGyLmM", "8zVqHEa7oAfpVteqd5alQk5tyD9oyPokMvO55u0o"};
+    minio::s3::Client client{base_url, &provider};
+    minio::s3::DownloadObjectArgs args;
+    args.bucket = "cloud-bucket";
+    args.object = object;
+    args.filename = "operation.kmz";
+    if (std::remove(args.filename.c_str()) == 0) {
+        std::cout << "operation.kmz deleted successfully." << std::endl;
+    }
+    auto resp = client.DownloadObject(args);
+    if (resp) {
+        std::cout << "cloud-bucket: " + object << "Download successful"
+                  << std::endl;
+        return "ok";
+    } else {
+        std::cout << "cloud-bucket: " + object << "Download failed:" << resp.Error().String()
+                  << std::endl;
+        return resp.Error().String();
+    }
+}
+
 
 static void *DjiTest_WaypointV3RunSampleTask(void *arg) {
     const string SERVER_ADDRESS{"mqtt://192.168.2.101:1883"};
-    std::string CLIENT_ID = "psdk_async_consume_gan:" + std::to_string(10);
+    std::string CLIENT_ID = "psdk_async_consume_:" + generateRandomString(10);
     const string TOPIC{"thing/edge/xxx/services"};
     const int QOS = 2;
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
     auto connOpts = mqtt::connect_options_builder()
             .clean_session(false)
             .finalize();
+//    T_DjiReturnCode returnCode;
+//    T_DjiOsalHandler *osalHandler = DjiPlatform_GetOsalHandler();
+//    T_DjiFcSubscriptionFlightStatus flightStatus = 0;
+//    T_DjiDataTimestamp flightStatusTimestamp = {0};
+
     try {
         cli.start_consuming();
         cout << "Connecting to the MQTT server..." << flush;
@@ -68,46 +113,102 @@ static void *DjiTest_WaypointV3RunSampleTask(void *arg) {
         auto rsp = tok->get_connect_response();
         if (!rsp.is_session_present())
             cli.subscribe(TOPIC, QOS)->wait();
-        cout << "OK" << endl;
         cout << "Waiting for messages on topic: '" << TOPIC << "'" << endl;
-//        T_DjiReturnCode returnCode;
-//        T_DjiOsalHandler *osalHandler = DjiPlatform_GetOsalHandler();
-//        T_DjiFcSubscriptionFlightStatus flightStatus = 0;
-//        T_DjiDataTimestamp flightStatusTimestamp = {0};
+//        returnCode = DjiWaypointV3_Init();
+//        if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//            USER_LOG_ERROR("Waypoint v3 init failed.");
+//            return nullptr;
+//        }
         while (true) {
             auto msg = cli.consume_message();
             if (!msg) break;
             cout << msg->get_topic() << ": " << msg->to_string() << endl;
             nlohmann::json j = nlohmann::json::parse(msg->get_payload());
             std::string method = j["method"];
-            if (method == "waypoint_v3_action") {
+            int flag = false;
+            std::string result_msg = "ok";
+            if (method == "waypoint_v3_upload_kmz_file") {
+                flag = true;
+                nlohmann::json data = j["data"];
+                std::string object = data["waypoint_kmz_file_name"];
+                result_msg = downloadObject(object);
+                if (result_msg != "ok") {
+                    goto services_reply;
+                }
+                std::ifstream kmzFile{"operation.kmz", std::ios::binary | std::ios::ate};
+                if (kmzFile) {
+                    std::streampos fileSize = kmzFile.tellg();
+                    kmzFile.seekg(0, std::ios::beg);
+                    std::vector<uint8_t> kmzFileBuf(static_cast<size_t>(fileSize));
+                    kmzFile.read(reinterpret_cast<char *>(kmzFileBuf.data()), static_cast<std::streamsize>(fileSize));
+//                    returnCode = DjiWaypointV3_UploadKmzFile(kmzFileBuf.data(), kmzFileBuf.size());
+//                    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//                        std::cerr << "Upload kmz file failed." << std::endl;
+//                        result_msg = "Upload kmz file failed.";
+//                    }
+                    cout << "kmzFile-size:"<<kmzFileBuf.size() << endl;
+                    kmzFile.close();
+                } else {
+                    std::cerr << "Open kmz file failed." << std::endl;
+                    result_msg = "Open kmz file failed.";
+                }
+            } else if (method == "waypoint_v3_action") {
+                flag = true;
                 nlohmann::json data = j["data"];
                 int waypoint_action = data["waypoint_action"];
-                cout << waypoint_action << endl;
                 switch (waypoint_action) {
                     case 0:
+//                        returnCode = DjiWaypointV3_Action(DJI_WAYPOINT_V3_ACTION_START);
+//                        if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//                            USER_LOG_ERROR("Execute start action failed.");
+//                            result_msg = "start action failed.";
+//                        }
                         break;
                     case 1:
+//                        returnCode = DjiWaypointV3_Action(DJI_WAYPOINT_V3_ACTION_STOP);
+//                        if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//                            USER_LOG_ERROR("Execute stop action failed.");
+//                            result_msg = "stop action failed.";
+//                        }
                         break;
                     case 2:
+//                        returnCode = DjiWaypointV3_Action(DJI_WAYPOINT_V3_ACTION_PAUSE);
+//                        if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//                            USER_LOG_ERROR("Execute start action failed.");
+//                            result_msg = "pause action failed.";
+//                        }
                         break;
                     case 3:
+//                        returnCode = DjiWaypointV3_Action(DJI_WAYPOINT_V3_ACTION_RESUME);
+//                        if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//                            USER_LOG_ERROR("Execute start action failed.");
+//                            result_msg = "resume action failed.";
+//                        }
                         break;
                     default:
-                        cout << "invalid waypoint action" << endl;
+                        result_msg = "invalid action";
+                        break;
                 }
-                std::chrono::milliseconds milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::system_clock::now().time_since_epoch());
+            }
+            if (flag) {
+                services_reply:
+                int result = 0;
+                if (result_msg != "ok") {
+                    result = -1;
+                }
+                std::chrono::milliseconds milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(
+                        std::chrono::system_clock::now().time_since_epoch());
                 nlohmann::json ret_json = {
-                        {"tid", j["tid"]},
-                        {"bid", j["bid"]},
+                        {"tid",       j["tid"]},
+                        {"bid",       j["bid"]},
                         {"timestamp", milliseconds.count()}, // 使用函数返回值作为表达式
-                        {"gateway", "xxx"},
-                        {"method", "waypoint_v3_action"},
-                        {"data", {
-                                        {"result", 0}
-                                }}
+                        {"method",    "waypoint_v3_action"},
+                        {"data",      {
+                                              {"result", result},
+                                              {"message", result_msg},
+                                      }}
                 };
-                cli.publish("thing/edge/xxx/services_reply",ret_json.dump(4));
+                cli.publish("thing/edge/xxx/services_reply", ret_json.dump(4));
             }
         }
         if (cli.is_connected()) {
@@ -123,161 +224,10 @@ static void *DjiTest_WaypointV3RunSampleTask(void *arg) {
     catch (const mqtt::exception &exc) {
         cerr << "\n  " << exc << endl;
     }
-
-
-//
-//#ifdef SYSTEM_ARCH_LINUX
-//    FILE *kmzFile = NULL;
-//    uint32_t kmzFileSize = 0;
-//    uint8_t *kmzFileBuf;
-//    uint16_t readLen;
-//    char curFileDirPath[DJI_TEST_WAYPOINT_V3_KMZ_FILE_PATH_LEN_MAX];
-//    char tempPath[DJI_TEST_WAYPOINT_V3_KMZ_FILE_PATH_LEN_MAX];
-//
-//    returnCode = DjiWaypointV3_Init();
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Waypoint v3 init failed.");
-//        return returnCode;
-//    }
-//
-//    returnCode = DjiWaypointV3_RegMissionStateCallback(DjiTest_WaypointV3MissionStateCallback);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Register waypoint v3 state callback failed.");
-//        goto out;
-//    }
-//
-//    returnCode = DjiWaypointV3_RegActionStateCallback(DjiTest_WaypointV3ActionStateCallback);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Register waypoint v3 action state callback failed.");
-//        goto out;
-//    }
-//
-//    returnCode = DjiUserUtil_GetCurrentFileDirPath(__FILE__, DJI_TEST_WAYPOINT_V3_KMZ_FILE_PATH_LEN_MAX,
-//                                                   curFileDirPath);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Get file current path error, stat = 0x%08llX", returnCode);
-//        goto out;
-//    }
-//
-//    /*! Attention: suggest use the exported kmz file by DJI pilot. If use this test file, you need set the longitude as
-//     * 113.94255, latitude as 22.57765 on DJI Assistant 2 simulator */
-//    snprintf(tempPath, DJI_TEST_WAYPOINT_V3_KMZ_FILE_PATH_LEN_MAX, "%s/waypoint_file/waypoint_v3_test_file.kmz",
-//             curFileDirPath);
-//
-//    kmzFile = fopen(tempPath, "r");
-//    if (kmzFile == NULL) {
-//        USER_LOG_ERROR("Open kmz file failed.");
-//        goto out;
-//    }
-//
-//    returnCode = UtilFile_GetFileSize(kmzFile, &kmzFileSize);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Get kmz file size failed.");
-//        goto close_file;
-//    }
-//
-//    kmzFileBuf = osalHandler->Malloc(kmzFileSize);
-//    if (kmzFileBuf == NULL) {
-//        USER_LOG_ERROR("Malloc kmz file buf error.");
-//        goto close_file;
-//    }
-//
-//    readLen = fread(kmzFileBuf, 1, kmzFileSize, kmzFile);
-//    if (readLen != kmzFileSize) {
-//        USER_LOG_ERROR("Read kmz file data failed.");
-//        goto close_file;
-//    }
-//
-//    returnCode = DjiWaypointV3_UploadKmzFile(kmzFileBuf, kmzFileSize);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Upload kmz file failed.");
-//        goto close_file;
-//    }
-//
-//    osalHandler->Free(kmzFileBuf);
-//#else
-//    returnCode = DjiWaypointV3_UploadKmzFile(waypoint_v3_test_file_kmz_fileBinaryArray,
-//                                             waypoint_v3_test_file_kmz_fileSize);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Upload kmz file binary array failed.");
-//        return returnCode;
-//    }
-//#endif
-//
-//    USER_LOG_INFO("Execute start action");
-//    returnCode = DjiWaypointV3_Action(DJI_WAYPOINT_V3_ACTION_START);
+//    returnCode = DjiWaypointV3_DeInit();
 //    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
 //        USER_LOG_ERROR("Execute start action failed.");
-//        goto close_file;
 //    }
-//
-//    close_file:
-//#ifdef SYSTEM_ARCH_LINUX
-//    returnCode = fclose(kmzFile);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Close KMZ file failed.");
-//    }
-//    kmzFile = NULL;
-//#endif
-//
-//    returnCode = DjiFcSubscription_SubscribeTopic(DJI_FC_SUBSCRIPTION_TOPIC_STATUS_FLIGHT,
-//                                                  DJI_DATA_SUBSCRIPTION_TOPIC_10_HZ,
-//                                                  NULL);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Subscribe topic flight status failed, error code:0x%08llX", returnCode);
-//        goto out;
-//    }
-//
-//    USER_LOG_INFO("The aircraft is on the ground and motors are stoped...");
-//    returnCode = DjiTest_WaypointV3WaitEndFlightStatus(DJI_FC_SUBSCRIPTION_FLIGHT_STATUS_STOPED);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Wait end flight status error.");
-//        goto out;
-//    }
-//
-//    USER_LOG_INFO("The aircraft is on the ground and motors are rotating...");
-//    returnCode = DjiTest_WaypointV3WaitEndFlightStatus(DJI_FC_SUBSCRIPTION_FLIGHT_STATUS_ON_GROUND);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Wait end flight status error.");
-//        goto out;
-//    }
-//
-//    USER_LOG_INFO("The aircraft is in the air...");
-//    returnCode = DjiTest_WaypointV3WaitEndFlightStatus(DJI_FC_SUBSCRIPTION_FLIGHT_STATUS_IN_AIR);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Wait end flight status error.");
-//        goto out;
-//    }
-//
-//    USER_LOG_INFO("The aircraft is on the ground and motors are rotating...");
-//    returnCode = DjiTest_WaypointV3WaitEndFlightStatus(DJI_FC_SUBSCRIPTION_FLIGHT_STATUS_ON_GROUND);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Wait end flight status error.");
-//        goto out;
-//    }
-//
-//    returnCode = DjiFcSubscription_GetLatestValueOfTopic(DJI_FC_SUBSCRIPTION_TOPIC_STATUS_FLIGHT,
-//                                                         (uint8_t *) &flightStatus,
-//                                                         sizeof(T_DjiFcSubscriptionFlightStatus),
-//                                                         &flightStatusTimestamp);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Get value of topic flight status failed, error code:0x%08llX", returnCode);
-//        goto out;
-//    }
-//
-//    if (flightStatus != DJI_FC_SUBSCRIPTION_FLIGHT_STATUS_STOPED) {
-//        USER_LOG_ERROR("Aircraft's flight status error, motors are not stoped.");
-//        goto out;
-//    }
-//
-//    USER_LOG_INFO("The aircraft is on the ground now, and motor are stoped.");
-//
-//    out:
-//#ifdef SYSTEM_ARCH_LINUX
-//    if (kmzFile != NULL) {
-//        fclose(kmzFile);
-//    }
-//#endif
-//    DjiWaypointV3_DeInit();
+    return nullptr;
 }
 

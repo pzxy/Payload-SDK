@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.10)
 project(dji_sdk_demo_on_jetson_cxx CXX)
 
 set(CMAKE_C_FLAGS "-pthread -std=gnu99")
@@ -25,7 +25,7 @@ file(GLOB_RECURSE MODULE_SAMPLE_SRC
         ../../../module_sample/perception/*.c*
         ../../../module_sample/gimbal/*.c*
         ../../../../sample_c/module_sample/*.c
-        )
+)
 file(GLOB_RECURSE MODULE_COMMON_SRC ../common/*.c*)
 file(GLOB_RECURSE MODULE_HAL_SRC hal/*.c*)
 file(GLOB_RECURSE MODULE_APP_SRC application/*.c*)
@@ -47,30 +47,25 @@ add_executable(${PROJECT_NAME}
 
 # Try to see if user has OpenCV installed
 # if yes, default callback will display the image
-find_package(OpenCV QUIET)
-if (OpenCV_FOUND)
-    message("\n${PROJECT_NAME}...")
-    message(STATUS "Found OpenCV installed in the system, will use it to display image in AdvancedSensing APIs")
-    message(STATUS " - Includes: ${OpenCV_INCLUDE_DIRS}")
-    message(STATUS " - Libraries: ${OpenCV_LIBRARIES}")
-    add_definitions(-DOPEN_CV_INSTALLED)
-else ()
-    message(STATUS "Did not find OpenCV in the system, image data is inside RecvContainer as raw data")
-endif ()
+#find_package(OpenCV QUIET)
+#if (OpenCV_FOUND)
+#    message("\n${PROJECT_NAME}...")
+#    message(STATUS "Found OpenCV installed in the system, will use it to display image in AdvancedSensing APIs")
+#    message(STATUS " - Includes: ${OpenCV_INCLUDE_DIRS}")
+#    message(STATUS " - Libraries: ${OpenCV_LIBRARIES}")
+#    add_definitions(-DOPEN_CV_INSTALLED)
+#else ()
+#    message(STATUS "Did not find OpenCV in the system, image data is inside RecvContainer as raw data")
+#endif ()
 
 find_package(nlohmann_json REQUIRED)
-if (nlohmann_json)
-    target_link_libraries(${PROJECT_NAME} nlohmann_json::nlohmann_json)
-else ()
-    message(STATUS "Cannot Find nlohmann_json")
-endif (nlohmann_json)
+target_link_libraries(${PROJECT_NAME} nlohmann_json::nlohmann_json)
 
 find_package(PahoMqttCpp REQUIRED)
-if (PahoMqttCpp_FOUND)
-    target_link_libraries(${PROJECT_NAME} PahoMqttCpp::paho-mqttpp3)
-else ()
-    message(STATUS "Cannot find Paho MQTT")
-endif ()
+target_link_libraries(${PROJECT_NAME} PahoMqttCpp::paho-mqttpp3)
+
+find_package(miniocpp REQUIRED)
+target_link_libraries(${PROJECT_NAME} miniocpp::miniocpp)
 
 #find_package(FFMPEG REQUIRED)
 #if (FFMPEG_FOUND)
