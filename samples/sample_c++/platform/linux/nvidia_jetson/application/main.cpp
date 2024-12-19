@@ -28,6 +28,8 @@
 #include "application.hpp"
 #include <dji_logger.h>
 #include <power_management/test_power_management.h>
+#include "flight_controller/test_flight_controller_command_flying.hpp"
+#include "gimbal/test_gimbal_entry_task.hpp"
 
 /* Private constants ---------------------------------------------------------*/
 
@@ -39,6 +41,8 @@
 static T_DjiReturnCode DjiTest_HighPowerApplyPinInit();
 static T_DjiReturnCode DjiTest_WriteHighPowerApplyPin(E_DjiPowerManagementPinState pinState);
 static T_DjiTaskHandle s_waypointV3TaskHandle;
+static T_DjiTaskHandle s_flightControlTaskHandle;
+static T_DjiTaskHandle s_gimbalManagerTaskHandle;
 /* Exported functions definition ---------------------------------------------*/
 int main(int argc, char **argv)
 {
@@ -54,7 +58,23 @@ int main(int argc, char **argv)
         USER_LOG_ERROR("Create waypoint v3 task failed, errno = 0x%08llX", returnCode);
         return returnCode;
     }
-    while (true) {
+    returnCode = osalHandler->TaskCreate("s_flightControlTaskHandle", DjiUser_RunFlightControllerCommandFlyingSampleTask,
+                                         4096, nullptr,
+                                         &s_flightControlTaskHandle);
+    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+        USER_LOG_ERROR("Create flight control task failed, errno = 0x%08llX", returnCode);
+        return returnCode;
+    }
+
+    returnCode = osalHandler->TaskCreate("s_gimbalManagerTaskHandle", DjiUser_RunGimbalManagerSampleTask,
+                                         4096, nullptr,
+                                         &s_gimbalManagerTaskHandle);
+    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+        USER_LOG_ERROR("Create gimbal manager task failed, errno = 0x%08llX", returnCode);
+        return returnCode;
+    }
+
+    while (1) {
         cout << "...main..." << endl;
         osalHandler->TaskSleepMs(100000);
     }

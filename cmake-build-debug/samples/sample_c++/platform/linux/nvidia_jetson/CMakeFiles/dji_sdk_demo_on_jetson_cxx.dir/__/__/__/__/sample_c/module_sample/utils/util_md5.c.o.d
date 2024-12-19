@@ -2,10 +2,12 @@ samples/sample_c++/platform/linux/nvidia_jetson/CMakeFiles/dji_sdk_demo_on_jetso
  /home/nvidia/Workspace/dji/Payload-SDK/samples/sample_c/module_sample/utils/util_md5.c \
  /usr/include/stdc-predef.h \
  /home/nvidia/Workspace/dji/Payload-SDK/samples/sample_c/module_sample/utils/util_md5.h \
- /usr/lib/gcc/aarch64-linux-gnu/9/include/stddef.h /usr/include/stdlib.h \
+ /usr/lib/gcc/aarch64-linux-gnu/11/include/stddef.h /usr/include/stdlib.h \
  /usr/include/aarch64-linux-gnu/bits/libc-header-start.h \
- /usr/include/features.h /usr/include/aarch64-linux-gnu/sys/cdefs.h \
+ /usr/include/features.h /usr/include/features-time64.h \
  /usr/include/aarch64-linux-gnu/bits/wordsize.h \
+ /usr/include/aarch64-linux-gnu/bits/timesize.h \
+ /usr/include/aarch64-linux-gnu/sys/cdefs.h \
  /usr/include/aarch64-linux-gnu/bits/long-double.h \
  /usr/include/aarch64-linux-gnu/gnu/stubs.h \
  /usr/include/aarch64-linux-gnu/gnu/stubs-lp64.h \
@@ -17,7 +19,6 @@ samples/sample_c++/platform/linux/nvidia_jetson/CMakeFiles/dji_sdk_demo_on_jetso
  /usr/include/aarch64-linux-gnu/bits/types/__locale_t.h \
  /usr/include/aarch64-linux-gnu/sys/types.h \
  /usr/include/aarch64-linux-gnu/bits/types.h \
- /usr/include/aarch64-linux-gnu/bits/timesize.h \
  /usr/include/aarch64-linux-gnu/bits/typesizes.h \
  /usr/include/aarch64-linux-gnu/bits/time64.h \
  /usr/include/aarch64-linux-gnu/bits/types/clock_t.h \
@@ -38,6 +39,7 @@ samples/sample_c++/platform/linux/nvidia_jetson/CMakeFiles/dji_sdk_demo_on_jetso
  /usr/include/aarch64-linux-gnu/bits/pthreadtypes.h \
  /usr/include/aarch64-linux-gnu/bits/thread-shared-types.h \
  /usr/include/aarch64-linux-gnu/bits/pthreadtypes-arch.h \
+ /usr/include/aarch64-linux-gnu/bits/atomic_wide_counter.h \
  /usr/include/aarch64-linux-gnu/bits/struct_mutex.h \
  /usr/include/aarch64-linux-gnu/bits/struct_rwlock.h \
  /usr/include/alloca.h /usr/include/aarch64-linux-gnu/bits/stdlib-float.h \

@@ -84,27 +84,29 @@ static void *DjiTest_WaypointV3RunSampleTask(void *arg) {
     std::string CLIENT_ID = "psdk_async_consume_:" + generateRandomString(10);
     const string TOPIC{"thing/edge/xxx/services"};
     const int QOS = 2;
+
+    T_DjiReturnCode returnCode;
+    T_DjiDataTimestamp flightStatusTimestamp = {0};
+    returnCode = DjiWaypointV3_Init();
+    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+        USER_LOG_ERROR("Waypoint v3 init failed.");
+        return nullptr;
+    }
+
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
     auto connOpts = mqtt::connect_options_builder()
             .clean_session(false)
             .finalize();
-    T_DjiReturnCode returnCode;
-    T_DjiDataTimestamp flightStatusTimestamp = {0};
+    cli.start_consuming();
+    cout << "Connecting to the MQTT server..." << flush;
+    auto tok = cli.connect(connOpts);
+    auto rsp = tok->get_connect_response();
+    if (!rsp.is_session_present())
+        cli.subscribe(TOPIC, QOS)->wait();
+    cout << "Waypoint v3 Waiting for messages on topic: '" << TOPIC << "'" << endl;
 
-    try {
-        cli.start_consuming();
-        cout << "Connecting to the MQTT server..." << flush;
-        auto tok = cli.connect(connOpts);
-        auto rsp = tok->get_connect_response();
-        if (!rsp.is_session_present())
-            cli.subscribe(TOPIC, QOS)->wait();
-        cout << "Waiting for messages on topic: '" << TOPIC << "'" << endl;
-        returnCode = DjiWaypointV3_Init();
-        if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-            USER_LOG_ERROR("Waypoint v3 init failed.");
-            return nullptr;
-        }
-        while (true) {
+    while (true) {
+        try {
             auto msg = cli.consume_message();
             if (!msg) break;
             cout << msg->get_topic() << ": " << msg->to_string() << endl;
@@ -175,13 +177,11 @@ static void *DjiTest_WaypointV3RunSampleTask(void *arg) {
                             }
                             break;
                         default:
-                            result_msg = "invalid action";
                             break;
                     }
                 }
             }
             if (flag) {
-                services_reply:
                 int result = 0;
                 if (result_msg != "ok") {
                     result = -1;
@@ -200,23 +200,25 @@ static void *DjiTest_WaypointV3RunSampleTask(void *arg) {
                 };
                 cli.publish("thing/edge/xxx/services_reply", ret_json.dump(4));
             }
+
         }
-        if (cli.is_connected()) {
-            cout << "\nShutting down and disconnecting from the MQTT server..." << flush;
-            cli.unsubscribe(TOPIC)->wait();
-            cli.stop_consuming();
-            cli.disconnect()->wait();
-            cout << "OK" << endl;
-        } else {
-            cout << "\nClient was disconnected" << endl;
+        catch (const exception &exc) {
+            cerr << "\n  " << exc.what() << endl;
         }
     }
-    catch (const mqtt::exception &exc) {
-        cerr << "\n  " << exc << endl;
-    }
+
     returnCode = DjiWaypointV3_DeInit();
     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-        USER_LOG_ERROR("Execute start action failed.");
+        USER_LOG_ERROR("DjiWaypointV3_DeInit failed.");
+    }
+    if (cli.is_connected()) {
+        cout << "\nShutting down and disconnecting from the MQTT server..." << flush;
+        cli.unsubscribe(TOPIC)->wait();
+        cli.stop_consuming();
+        cli.disconnect()->wait();
+        cout << "OK" << endl;
+    } else {
+        cout << "\nClient was disconnected" << endl;
     }
     return nullptr;
 }

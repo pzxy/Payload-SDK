@@ -42,6 +42,11 @@ if(NOT DEFINED CMAKE_OBJDUMP)
   set(CMAKE_OBJDUMP "/usr/bin/objdump")
 endif()
 
+if(NOT CMAKE_INSTALL_LOCAL_ONLY)
+  # Include the install script for the subdirectory.
+  include("/home/nvidia/Workspace/dji/Payload-SDK/cmake-build-debug/samples/sample_c++/platform/linux/nvidia_jetson/cmake_install.cmake")
+endif()
+
 if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_COMPONENT)
   list(APPEND CMAKE_ABSOLUTE_DESTINATION_FILES
    "/usr/local/lib/libpayloadsdk.a")
@@ -64,12 +69,6 @@ if("x${CMAKE_INSTALL_COMPONENT}x" STREQUAL "xUnspecifiedx" OR NOT CMAKE_INSTALL_
     message(FATAL_ERROR "ABSOLUTE path INSTALL DESTINATION forbidden (by caller): ${CMAKE_ABSOLUTE_DESTINATION_FILES}")
   endif()
   file(INSTALL DESTINATION "/usr/local" TYPE DIRECTORY FILES "/home/nvidia/Workspace/dji/Payload-SDK/psdk_lib/include")
-endif()
-
-if(NOT CMAKE_INSTALL_LOCAL_ONLY)
-  # Include the install script for each subdirectory.
-  include("/home/nvidia/Workspace/dji/Payload-SDK/cmake-build-debug/samples/sample_c++/platform/linux/nvidia_jetson/cmake_install.cmake")
-
 endif()
 
 if(CMAKE_INSTALL_COMPONENT)
