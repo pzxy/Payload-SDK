@@ -441,4 +441,5 @@ samples/sample_c++/platform/linux/nvidia_jetson/CMakeFiles/dji_sdk_demo_on_jetso
  /home/nvidia/Workspace/dji/Payload-SDK/samples/sample_c++/platform/linux/nvidia_jetson/../../../../sample_c/module_sample/gimbal_manager/test_gimbal_manager.h \
  /home/nvidia/Workspace/dji/Payload-SDK/samples/sample_c++/platform/linux/nvidia_jetson/../../../../../psdk_lib/include/dji_gimbal.h \
  /home/nvidia/Workspace/dji/Payload-SDK/samples/sample_c++/platform/linux/nvidia_jetson/../../../../../psdk_lib/include/dji_gimbal_manager.h \
- /usr/include/c++/11/math.h
+ /home/nvidia/Workspace/dji/Payload-SDK/samples/sample_c++/platform/linux/nvidia_jetson/../../../module_sample/camera_manager/test_camera_manager_entry.hpp \
+ /home/nvidia/Workspace/dji/Payload-SDK/samples/sample_c++/platform/linux/nvidia_jetson/../../../../../psdk_lib/include/dji_camera_manager.h
