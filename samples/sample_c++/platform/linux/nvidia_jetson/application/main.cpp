@@ -30,6 +30,7 @@
 #include <power_management/test_power_management.h>
 #include "flight_controller/test_flight_controller_command_flying.hpp"
 #include "gimbal/test_gimbal_entry_task.hpp"
+#include "camera_manager/test_camera_manager_entry.hpp"
 
 /* Private constants ---------------------------------------------------------*/
 
@@ -39,13 +40,16 @@
 
 /* Private functions declaration ---------------------------------------------*/
 static T_DjiReturnCode DjiTest_HighPowerApplyPinInit();
+
 static T_DjiReturnCode DjiTest_WriteHighPowerApplyPin(E_DjiPowerManagementPinState pinState);
+
 static T_DjiTaskHandle s_waypointV3TaskHandle;
 static T_DjiTaskHandle s_flightControlTaskHandle;
 static T_DjiTaskHandle s_gimbalManagerTaskHandle;
+static T_DjiTaskHandle s_cameraManagerTaskHandle;
+
 /* Exported functions definition ---------------------------------------------*/
-int main(int argc, char **argv)
-{
+int main(int argc, char **argv) {
     Application application(argc, argv);
     char inputChar;
     T_DjiOsalHandler *osalHandler = DjiPlatform_GetOsalHandler();
@@ -58,7 +62,8 @@ int main(int argc, char **argv)
         USER_LOG_ERROR("Create waypoint v3 task failed, errno = 0x%08llX", returnCode);
         return returnCode;
     }
-    returnCode = osalHandler->TaskCreate("s_flightControlTaskHandle", DjiUser_RunFlightControllerCommandFlyingSampleTask,
+    returnCode = osalHandler->TaskCreate("s_flightControlTaskHandle",
+                                         DjiUser_RunFlightControllerCommandFlyingSampleTask,
                                          4096, nullptr,
                                          &s_flightControlTaskHandle);
     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
@@ -71,6 +76,15 @@ int main(int argc, char **argv)
                                          &s_gimbalManagerTaskHandle);
     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
         USER_LOG_ERROR("Create gimbal manager task failed, errno = 0x%08llX", returnCode);
+        return returnCode;
+    }
+
+
+    returnCode = osalHandler->TaskCreate("s_cameraManagerTaskHandle", DjiUser_RunCameraManagerSampleTask,
+                                         4096, nullptr,
+                                         &s_cameraManagerTaskHandle);
+    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+        USER_LOG_ERROR("Create camera manager task failed, errno = 0x%08llX", returnCode);
         return returnCode;
     }
 
@@ -228,13 +242,11 @@ int main(int argc, char **argv)
 }
 
 /* Private functions definition-----------------------------------------------*/
-static T_DjiReturnCode DjiTest_HighPowerApplyPinInit()
-{
+static T_DjiReturnCode DjiTest_HighPowerApplyPinInit() {
     return DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS;
 }
 
-static T_DjiReturnCode DjiTest_WriteHighPowerApplyPin(E_DjiPowerManagementPinState pinState)
-{
+static T_DjiReturnCode DjiTest_WriteHighPowerApplyPin(E_DjiPowerManagementPinState pinState) {
     //attention: please pull up the HWPR pin state by hardware.
     return DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS;
 }
