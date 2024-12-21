@@ -194,57 +194,57 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
                 returnCode = DjiFlightController_ObtainJoystickCtrlAuthority();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("obtain joystick control authority failed, errno = 0x%08llX", returnCode);
+                    result_msg = &"obtain joystick control authority failed,code"[returnCode];
                 }
-                result_msg = &"obtain joystick control authority failed,code"[returnCode];
                 break;
             case 2:
                 returnCode = DjiFlightController_ReleaseJoystickCtrlAuthority();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("release joystick control authority failed, errno = 0x%08llX", returnCode);
+                    result_msg = &"release joystick control authority failed,code"[returnCode];
                 }
-                result_msg = &"release joystick control authority failed,code"[returnCode];
                 break;
             case 3:
                 returnCode = DjiFlightController_StartTakeoff();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("Take off fail, errno = 0x%08llX", returnCode);
+                    result_msg = &"Take off failed,code"[returnCode];
                 }
-                result_msg = &"Take off failed,code"[returnCode];
                 break;
             case 4:
                 returnCode = DjiFlightController_StartForceLanding();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("force landing fail, errno = 0x%08llX", returnCode);
+                    result_msg = &"force landing fail,code"[returnCode];
                 }
-                result_msg = &"force landing fail,code"[returnCode];
                 break;
             case 5:
                 returnCode = DjiFlightController_StartGoHome();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("start go home fail, errno = 0x%08llX", returnCode);
+                    result_msg = &"start go home fail,code"[returnCode];
                 }
-                result_msg = &"start go home fail,code"[returnCode];
                 break;
             case 6:
                 returnCode = DjiFlightController_CancelGoHome();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("cancel go home fail, errno = 0x%08llX", returnCode);
+                    result_msg = &"cancel go home fail,code"[returnCode];
                 }
-                result_msg = &"cancel go home fail,code"[returnCode];
                 break;
             case 7:
                 returnCode = DjiFlightController_StartLanding();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("start landing fail, errno = 0x%08llX", returnCode);
+                    result_msg = &"start landing fail,code"[returnCode];
                 }
-                result_msg = &"start landing fail,code"[returnCode];
                 break;
             case 8:
                 returnCode = DjiFlightController_CancelLanding();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("cancel landing fail, errno = 0x%08llX", returnCode);
+                    result_msg = &"cancel landing fail,code"[returnCode];
                 }
-                result_msg = &"cancel landing fail,code"[returnCode];
                 break;
             case 9:
                 try {

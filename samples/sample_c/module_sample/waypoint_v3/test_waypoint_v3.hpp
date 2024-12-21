@@ -98,7 +98,7 @@ static void *DjiTest_WaypointV3RunSampleTask(void *arg) {
             .clean_session(false)
             .finalize();
     cli.start_consuming();
-    cout << "Connecting to the MQTT server..." << flush;
+    cout << "Connecting to the MQTT server..." << flush <<endl;
     auto tok = cli.connect(connOpts);
     auto rsp = tok->get_connect_response();
     if (!rsp.is_session_present())
