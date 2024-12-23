@@ -189,13 +189,13 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
         auto msg = cli.consume_message();
         if (!msg) break;
         nlohmann::json j = nlohmann::json::parse(msg->get_payload());
-//        cout << msg->get_topic() << ": " << msg->to_string() << endl;
-
         std::string method = j["method"];
         int flag = true;
         std::string result_msg = "ok";
         int action = gen_action(method);
-        std::cout << "fc action: " << action<< std::endl;
+        if (action !=0 ){
+            cout << "flight control: "<<msg->get_topic() << ": " << msg->to_string() << endl;
+        }
         switch (action) {
             case 1:
                 returnCode = DjiFlightController_ObtainJoystickCtrlAuthority();

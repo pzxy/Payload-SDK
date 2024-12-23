@@ -109,12 +109,12 @@ static void *DjiTest_WaypointV3RunSampleTask(void *arg) {
         try {
             auto msg = cli.consume_message();
             if (!msg) break;
-            cout << msg->get_topic() << ": " << msg->to_string() << endl;
             nlohmann::json j = nlohmann::json::parse(msg->get_payload());
             std::string method = j["method"];
             int flag = false;
             std::string result_msg = "ok";
             if (method == "waypoint_v3_upload_kmz_file") {
+                cout << "waypoint: "<<msg->get_topic() << ": " << msg->to_string() << endl;
                 flag = true;
                 nlohmann::json data = j["data"];
                 std::string kmz_filename = data["waypoint_kmz_file_name"];
@@ -140,6 +140,7 @@ static void *DjiTest_WaypointV3RunSampleTask(void *arg) {
                     }
                 }
             } else if (method == "waypoint_v3_action") {
+                cout << "waypoint: "<<msg->get_topic() << ": " << msg->to_string() << endl;
                 flag = true;
                 nlohmann::json data = j["data"];
                 int waypoint_action = data["waypoint_action"];
