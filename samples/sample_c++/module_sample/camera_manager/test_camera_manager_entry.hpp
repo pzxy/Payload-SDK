@@ -26,7 +26,7 @@ static int gen_camera_action(std::string method) {
 static void *DjiUser_RunCameraManagerSampleTask(void *arg);
 
 static void *DjiUser_RunCameraManagerSampleTask(void *arg) {
-    const std::string SERVER_ADDRESS{"mqtt://192.168.2.101:1883"};
+    const std::string SERVER_ADDRESS{"mqtt://47.97.201.247:1883"};
     std::string CLIENT_ID = "psdk_async_consume_camera_898798u";
     const std::string TOPIC{"thing/edge/xxx/services"};
     const int QOS = 2;

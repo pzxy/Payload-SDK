@@ -71,23 +71,22 @@ int main(int argc, char **argv) {
         USER_LOG_ERROR("Create flight control task failed, errno = 0x%08llX", returnCode);
         return returnCode;
     }
-////
-//    returnCode = osalHandler->TaskCreate("s_gimbalManagerTaskHandle", DjiUser_RunGimbalManagerSampleTask,
-//                                         4096, nullptr,
-//                                         &s_gimbalManagerTaskHandle);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Create gimbal manager task failed, errno = 0x%08llX", returnCode);
-//        return returnCode;
-//    }
-//
-//
-//    returnCode = osalHandler->TaskCreate("s_cameraManagerTaskHandle", DjiUser_RunCameraManagerSampleTask,
-//                                         4096, nullptr,
-//                                         &s_cameraManagerTaskHandle);
-//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-//        USER_LOG_ERROR("Create camera manager task failed, errno = 0x%08llX", returnCode);
-//        return returnCode;
-//    }
+
+    returnCode = osalHandler->TaskCreate("s_gimbalManagerTaskHandle", DjiUser_RunGimbalManagerSampleTask,
+                                         4096, nullptr,
+                                         &s_gimbalManagerTaskHandle);
+    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+        USER_LOG_ERROR("Create gimbal manager task failed, errno = 0x%08llX", returnCode);
+        return returnCode;
+    }
+
+    returnCode = osalHandler->TaskCreate("s_cameraManagerTaskHandle", DjiUser_RunCameraManagerSampleTask,
+                                         4096, nullptr,
+                                         &s_cameraManagerTaskHandle);
+    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+        USER_LOG_ERROR("Create camera manager task failed, errno = 0x%08llX", returnCode);
+        return returnCode;
+    }
 
     while (1) {
         cout << "...main..." << endl;

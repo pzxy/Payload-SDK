@@ -168,8 +168,8 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
 //        USER_LOG_ERROR("Create status display task failed, errno = 0x%08llX", returnCode);
 //        return nullptr;
 //    }
-    const string SERVER_ADDRESS{"mqtt://192.168.2.101:1883"};
-    std::string CLIENT_ID = "psdk_async_consume_0123456789";
+    const string SERVER_ADDRESS{"mqtt://47.97.201.247:1883"};
+    std::string CLIENT_ID = "psdk_async_consume_fc_0123456789";
     const string TOPIC{"thing/edge/xxx/services"};
     const int QOS = 2;
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
@@ -217,6 +217,7 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
                     USER_LOG_ERROR("Take off fail, errno = 0x%08llX", returnCode);
                     result_msg = "Take off failed,code: " + std::to_string(returnCode);
                 }
+                break;
             case 4:
                 returnCode = DjiFlightController_StartForceLanding();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
@@ -338,7 +339,7 @@ static void *DjiUser_FlightControllerCommandFlyingTask(void *arg) {
 
     ridInfo.latitude = 22.542812;
     ridInfo.longitude = 113.958902;
-    ridInfo.altitude = 60;
+    ridInfo.altitude = 0;
 
     returnCode = DjiFlightController_Init(ridInfo);
     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
@@ -417,7 +418,7 @@ static void *DjiUser_FlightControllerCommandFlyingTask(void *arg) {
 
     while (true) {
         s_inputFlag++;
-        if (s_inputFlag > 25) {
+        if (s_inputFlag > 30) {
             s_flyingCommand.x = 0;
             s_flyingCommand.y = 0;
             s_flyingCommand.z = 0;

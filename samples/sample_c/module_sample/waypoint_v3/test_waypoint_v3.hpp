@@ -55,7 +55,7 @@ static std::string generateRandomString(size_t length) {
 }
 
 static std::string download_object(std::string const &filename) {
-    minio::s3::BaseUrl base_url{"192.168.2.159:30092", false};
+    minio::s3::BaseUrl base_url{"101.71.247.162:30092", false};
     minio::creds::StaticProvider provider{
             "lOA5v9mXMLKIjRvGyLmM", "8zVqHEa7oAfpVteqd5alQk5tyD9oyPokMvO55u0o"};
     minio::s3::Client client{base_url, &provider};
@@ -80,8 +80,8 @@ static std::string download_object(std::string const &filename) {
 
 
 static void *DjiTest_WaypointV3RunSampleTask(void *arg) {
-    const string SERVER_ADDRESS{"mqtt://192.168.2.101:1883"};
-    std::string CLIENT_ID = "psdk_async_consume_:" + generateRandomString(10);
+    const string SERVER_ADDRESS{"mqtt://47.97.201.247:1883"};
+    std::string CLIENT_ID = "psdk_async_consume_way_:" + generateRandomString(10);
     const string TOPIC{"thing/edge/xxx/services"};
     const int QOS = 2;
 
