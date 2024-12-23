@@ -125,7 +125,7 @@ static void *DjiUser_RunGimbalManagerSampleTask(void *arg) {
                     returnCode = DjiGimbalManager_SetMode(mount_position, gimbal_mode);
                     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                         USER_LOG_ERROR("gimbal manager set mode failed, errno = 0x%08llX", returnCode);
-                        result_msg = &"gimbal manager set mode failed,code"[returnCode];
+                        result_msg = "gimbal manager set mode failed,code" + std::to_string(returnCode);
                     }
                 } catch (std::exception &exc) {
                     USER_LOG_ERROR("gimbal manager set mode failed,%s", exc.what());
@@ -140,7 +140,7 @@ static void *DjiUser_RunGimbalManagerSampleTask(void *arg) {
                     returnCode = DjiGimbalManager_Reset(mount_position, gimbal_reset_mode);
                     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                         USER_LOG_ERROR("gimbal manager reset failed, errno = 0x%08llX", returnCode);
-                        result_msg = &"gimbal manager reset failed,code"[returnCode];
+                        result_msg = "gimbal manager reset failed,code" + std::to_string(returnCode);
                     }
                 } catch (std::exception &exc) {
                     USER_LOG_ERROR("gimbal manager reset failed,%s", exc.what());
@@ -161,7 +161,7 @@ static void *DjiUser_RunGimbalManagerSampleTask(void *arg) {
                     returnCode = DjiGimbalManager_Rotate(mount_position, rotation);
                     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                         USER_LOG_ERROR("gimbal manager rotate, errno = 0x%08llX", returnCode);
-                        result_msg = &"gimbal manager rotate failed,code"[returnCode];
+                        result_msg = "gimbal manager rotate failed,code" + std::to_string(returnCode);
                     }
                 } catch (std::exception &exc) {
                     USER_LOG_ERROR("gimbal manager rotate failed,%s", exc.what());
@@ -177,7 +177,7 @@ static void *DjiUser_RunGimbalManagerSampleTask(void *arg) {
                     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                         USER_LOG_ERROR("gimbal manager set pitch range extension enabled fail, errno = 0x%08llX", returnCode);
                     }
-                    result_msg = &"gimbal manager set pitch range extension enabled fail,code"[returnCode];
+                    result_msg = "gimbal manager set pitch range extension enabled fail,code" + std::to_string(returnCode);
                 } catch (std::exception &exc) {
                     USER_LOG_ERROR("gimbal manager set pitch range extension enabled fail,%s", exc.what());
                     result_msg = "gimbal manager set pitch range extension enabled fail, " + std::string(exc.what());
@@ -192,7 +192,7 @@ static void *DjiUser_RunGimbalManagerSampleTask(void *arg) {
                     returnCode = DjiGimbalManager_SetControllerMaxSpeedPercentage(mount_position,axis,max_speed_percentage);
                     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                         USER_LOG_ERROR("gimbal manager set controller max speed percentage fail, errno = 0x%08llX", returnCode);
-                        result_msg = &"gimbal manager set controller max speed percentage fail,code"[returnCode];
+                        result_msg = "gimbal manager set controller max speed percentage fail,code" + std::to_string(returnCode);
                     }
                 } catch (std::exception &exc) {
                     USER_LOG_ERROR("gimbal manager set controller max speed percentage fail,%s", exc.what());
@@ -208,7 +208,7 @@ static void *DjiUser_RunGimbalManagerSampleTask(void *arg) {
                     returnCode = DjiGimbalManager_SetControllerSmoothFactor(mount_position,axis,smoothing_factor);
                     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                         USER_LOG_ERROR("gimbal manager set controller smooth factor fail, errno = 0x%08llX", returnCode);
-                        result_msg = &"gimbal manager set controller smooth factor fail,code"[returnCode];
+                        result_msg = "gimbal manager set controller smooth factor fail,code" + std::to_string(returnCode);
                     }
                 } catch (std::exception &exc) {
                     USER_LOG_ERROR("gimbal manager set controller smooth factor fail,%s", exc.what());
@@ -222,7 +222,7 @@ static void *DjiUser_RunGimbalManagerSampleTask(void *arg) {
                     returnCode = DjiGimbalManager_RestoreFactorySettings(mount_position);
                     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                         USER_LOG_ERROR("gimbal manager restore factory settings fail, errno = 0x%08llX", returnCode);
-                        result_msg = &"gimbal manager restore factory settings fail,code"[returnCode];
+                        result_msg = "gimbal manager restore factory settings fail,code" + std::to_string(returnCode);
                     }
                 } catch (std::exception &exc) {
                     USER_LOG_ERROR("gimbal manager restore factory settings fail,%s", exc.what());

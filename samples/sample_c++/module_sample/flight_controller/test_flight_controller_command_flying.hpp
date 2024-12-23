@@ -82,6 +82,10 @@ static int gen_action(std::string method) {
         action = 9;
     } else if (method == "fc_execute_joystick_action") {
         action = 10;
+    }else if (method == "fc_arrest_flying") {
+        action = 11;
+    }else if (method == "fc_cancel_arrest_flying") {
+        action = 12;
     }
     return action;
 }
@@ -179,71 +183,73 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
     if (!rsp.is_session_present())
         cli.subscribe(TOPIC, QOS)->wait();
     cout << "Flight control Waiting for messages on topic: '" << TOPIC << "'" << endl;
-    osalHandler->TaskSleepMs(1000);
+    osalHandler->TaskSleepMs(3000);
 
     while (true) {
         auto msg = cli.consume_message();
         if (!msg) break;
         nlohmann::json j = nlohmann::json::parse(msg->get_payload());
+//        cout << msg->get_topic() << ": " << msg->to_string() << endl;
+
         std::string method = j["method"];
         int flag = true;
         std::string result_msg = "ok";
         int action = gen_action(method);
+        std::cout << "fc action: " << action<< std::endl;
         switch (action) {
             case 1:
                 returnCode = DjiFlightController_ObtainJoystickCtrlAuthority();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("obtain joystick control authority failed, errno = 0x%08llX", returnCode);
-                    result_msg = &"obtain joystick control authority failed,code"[returnCode];
+                    result_msg = "obtain joystick control authority failed,code: " + std::to_string(returnCode);
                 }
                 break;
             case 2:
                 returnCode = DjiFlightController_ReleaseJoystickCtrlAuthority();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("release joystick control authority failed, errno = 0x%08llX", returnCode);
-                    result_msg = &"release joystick control authority failed,code"[returnCode];
+                    result_msg = "release joystick control authority failed,code: " + std::to_string(returnCode);
                 }
                 break;
             case 3:
                 returnCode = DjiFlightController_StartTakeoff();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("Take off fail, errno = 0x%08llX", returnCode);
-                    result_msg = &"Take off failed,code"[returnCode];
+                    result_msg = "Take off failed,code: " + std::to_string(returnCode);
                 }
-                break;
             case 4:
                 returnCode = DjiFlightController_StartForceLanding();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("force landing fail, errno = 0x%08llX", returnCode);
-                    result_msg = &"force landing fail,code"[returnCode];
+                    result_msg = "force landing fail,code: " + std::to_string(returnCode);
                 }
                 break;
             case 5:
                 returnCode = DjiFlightController_StartGoHome();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("start go home fail, errno = 0x%08llX", returnCode);
-                    result_msg = &"start go home fail,code"[returnCode];
+                    result_msg = "start go home fail,code: " + std::to_string(returnCode);
                 }
                 break;
             case 6:
                 returnCode = DjiFlightController_CancelGoHome();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("cancel go home fail, errno = 0x%08llX", returnCode);
-                    result_msg = &"cancel go home fail,code"[returnCode];
+                    result_msg = "cancel go home fail,code: " + std::to_string(returnCode);
                 }
                 break;
             case 7:
                 returnCode = DjiFlightController_StartLanding();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("start landing fail, errno = 0x%08llX", returnCode);
-                    result_msg = &"start landing fail,code"[returnCode];
+                    result_msg = "start landing fail,code: " + std::to_string(returnCode);
                 }
                 break;
             case 8:
                 returnCode = DjiFlightController_CancelLanding();
                 if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                     USER_LOG_ERROR("cancel landing fail, errno = 0x%08llX", returnCode);
-                    result_msg = &"cancel landing fail,code"[returnCode];
+                    result_msg = "cancel landing fail,code: " + std::to_string(returnCode);
                 }
                 break;
             case 9:
@@ -254,7 +260,7 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
                     joystickMode.yawControlMode = data["yaw_control_mode"];
                     joystickMode.horizontalCoordinate = data["horizontal_coordinate"];
                     joystickMode.stableControlMode = data["stable_control_mode"];
-                }catch(exception &exc){
+                } catch (exception &exc) {
                     USER_LOG_ERROR("set control mode fail,%s", exc.what());
                     result_msg = "set control mode fail , " + std::string(exc.what());
                 }
@@ -267,9 +273,23 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
                     s_flyingCommand.z = data["z"];
                     s_flyingCommand.yaw = data["yaw"];
                     s_inputFlag = 0;
-                }catch(exception &exc){
+                } catch (exception &exc) {
                     USER_LOG_ERROR("set control mode fail,%s", exc.what());
                     result_msg = "set control mode fail , " + std::string(exc.what());
+                }
+                break;
+            case 11:
+                returnCode = DjiFlightController_ArrestFlying();
+                if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+                    USER_LOG_ERROR("assert flying fail, errno = 0x%08llX", returnCode);
+                    result_msg = "assert flying fail,code: " + std::to_string(returnCode);
+                }
+                break;
+            case 12:
+                returnCode = DjiFlightController_CancelArrestFlying();
+                if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+                    USER_LOG_ERROR("cancel assert flying fail fail, errno = 0x%08llX", returnCode);
+                    result_msg = "cancel assert flying fail,code: " + std::to_string(returnCode);
                 }
                 break;
             default:
@@ -318,7 +338,7 @@ static void *DjiUser_FlightControllerCommandFlyingTask(void *arg) {
 
     ridInfo.latitude = 22.542812;
     ridInfo.longitude = 113.958902;
-    ridInfo.altitude = 0;
+    ridInfo.altitude = 60;
 
     returnCode = DjiFlightController_Init(ridInfo);
     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
@@ -936,6 +956,9 @@ static T_DjiReturnCode DjiUser_FlightControlUpdateConfig(void) {
     if (isFirstUpdateConfig == false) {
         USER_LOG_INFO("Using current aircraft location, not use config home location.");
         s_gpsPosition = DjiUser_FlightControlGetValueOfGpsPosition();
+        std::cout << "y: " <<  s_gpsPosition.y << endl;
+        std::cout << "x: " <<  s_gpsPosition.x << endl;
+
         s_homeLocation.latitude = (dji_f64_t) s_gpsPosition.y / 10000000;
         s_homeLocation.longitude = (dji_f64_t) s_gpsPosition.x / 10000000;
 
