@@ -123,8 +123,7 @@ static void *DjiUser_FlightControllerStatusDisplayTask(void *arg);
 
 static void DjiUser_ShowFlightStatusByOpenCV(void);
 
-static void DjiUser_FlightControllerVelocityAndYawRateCtrl(T_DjiFlightControllerJoystickMode mode,
-                                                           T_DjiFlightControllerJoystickCommand command);
+static void DjiUser_FlightControllerVelocityAndYawRateCtrl(T_DjiFlightControllerJoystickCommand command);
 
 static int DjiUser_ScanKeyboardInput(void);
 
@@ -193,9 +192,10 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
         int flag = true;
         std::string result_msg = "ok";
         int action = gen_action(method);
-        if (action !=0 ){
-            cout << "flight control: "<<msg->get_topic() << ": " << msg->to_string() << endl;
+        if (action ==0 ){
+            continue;
         }
+        cout << "flight control: "<<msg->get_topic() << ": " << msg->to_string() << endl;
         switch (action) {
             case 1:
                 returnCode = DjiFlightController_ObtainJoystickCtrlAuthority();
@@ -261,6 +261,8 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
                     joystickMode.yawControlMode = data["yaw_control_mode"];
                     joystickMode.horizontalCoordinate = data["horizontal_coordinate"];
                     joystickMode.stableControlMode = data["stable_control_mode"];
+                    std::cout << "set mode:----->" << joystickMode.horizontalControlMode <<joystickMode.stableControlMode << std::endl;
+                    DjiFlightController_SetJoystickMode(joystickMode);
                 } catch (exception &exc) {
                     USER_LOG_ERROR("set control mode fail,%s", exc.what());
                     result_msg = "set control mode fail , " + std::string(exc.what());
@@ -415,10 +417,10 @@ static void *DjiUser_FlightControllerCommandFlyingTask(void *arg) {
     }
 
     isCommandFlyingTaskStart = true;
-
+    DjiFlightController_SetJoystickMode(joystickMode);
     while (true) {
         s_inputFlag++;
-        if (s_inputFlag > 30) {
+        if (s_inputFlag > 20) {
             s_flyingCommand.x = 0;
             s_flyingCommand.y = 0;
             s_flyingCommand.z = 0;
@@ -426,7 +428,7 @@ static void *DjiUser_FlightControllerCommandFlyingTask(void *arg) {
             s_inputFlag = 0;
         }
 
-        DjiUser_FlightControllerVelocityAndYawRateCtrl(joystickMode, s_flyingCommand);
+        DjiUser_FlightControllerVelocityAndYawRateCtrl(s_flyingCommand);
 
         osalHandler->TaskSleepMs(1000 / DJI_TEST_COMMAND_FLYING_CTRL_FREQ);
     }
@@ -557,11 +559,8 @@ static void DjiUser_ShowFlightStatusByOpenCV(void) {
 #endif
 }
 
-static void DjiUser_FlightControllerVelocityAndYawRateCtrl(T_DjiFlightControllerJoystickMode mode,
-                                                           T_DjiFlightControllerJoystickCommand command) {
+static void DjiUser_FlightControllerVelocityAndYawRateCtrl(T_DjiFlightControllerJoystickCommand command) {
     T_DjiReturnCode returnCode;
-
-    DjiFlightController_SetJoystickMode(mode);
 
     USER_LOG_DEBUG("Joystick command: %.2f %.2f %.2f", command.x, command.y, command.z);
     returnCode = DjiFlightController_ExecuteJoystickAction(command);

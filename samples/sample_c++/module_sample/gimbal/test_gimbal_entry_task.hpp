@@ -116,9 +116,10 @@ static void *DjiUser_RunGimbalManagerSampleTask(void *arg) {
         int flag = true;
         std::string result_msg = "ok";
         int action = gen_gimbal_action(method);
-        if (action !=0 ){
-            cout << "gimbal manager: "<<msg->get_topic() << ": " << msg->to_string() << endl;
+        if (action ==0 ){
+            continue;
         }
+        cout << "gimbal manager: "<<msg->get_topic() << ": " << msg->to_string() << endl;
         switch (action) {
             case 1:
                 try {

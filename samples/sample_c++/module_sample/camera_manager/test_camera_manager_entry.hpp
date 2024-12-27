@@ -59,9 +59,10 @@ static void *DjiUser_RunCameraManagerSampleTask(void *arg) {
         int flag = true;
         std::string result_msg = "ok";
         int action = gen_camera_action(method);
-        if (action !=0 ){
-            cout << "camera manager: "<<msg->get_topic() << ": " << msg->to_string() << endl;
+        if (action ==0 ){
+            continue;
         }
+        cout << "camera manager: "<<msg->get_topic() << ": " << msg->to_string() << endl;
         switch (action) {
             case 1:
                 try {
