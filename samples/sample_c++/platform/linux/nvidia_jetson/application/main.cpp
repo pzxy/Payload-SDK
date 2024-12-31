@@ -56,13 +56,13 @@ int main(int argc, char **argv) {
     T_DjiReturnCode returnCode;
     T_DjiTestApplyHighPowerHandler applyHighPowerHandler;
 
-    returnCode = osalHandler->TaskCreate("s_waypointV3TaskHandle", DjiTest_WaypointV3RunSampleTask,
-                                         4096, nullptr,
-                                         &s_waypointV3TaskHandle);
-    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-        USER_LOG_ERROR("Create waypoint v3 task failed, errno = 0x%08llX", returnCode);
-        return returnCode;
-    }
+//    returnCode = osalHandler->TaskCreate("s_waypointV3TaskHandle", DjiTest_WaypointV3RunSampleTask,
+//                                         4096, nullptr,
+//                                         &s_waypointV3TaskHandle);
+//    if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//        USER_LOG_ERROR("Create waypoint v3 task failed, errno = 0x%08llX", returnCode);
+//        return returnCode;
+//    }
     returnCode = osalHandler->TaskCreate("s_flightControlTaskHandle",
                                          DjiUser_RunFlightControllerCommandFlyingSampleTask,
                                          4096, nullptr,
