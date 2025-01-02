@@ -39,13 +39,13 @@
     "desc_cn": "水平视觉避障开关",
     "desc_en": "Horizontal Visual Avoidance",
     "desc_range": "true/false",
-    "value": "true"
+    "value": "false"
   },
   "HorizontalRadarObstacleAvoidanceEnable": {
     "desc_cn": "水平TOF避障开关",
     "desc_en": "Horizontal TOF Avoidance",
     "desc_range": "true/false",
-    "value": "true"
+    "value": "false"
   },
   "UpwardsVisualObstacleAvoidanceEnable": {
     "desc_cn": "上视觉避障开关",

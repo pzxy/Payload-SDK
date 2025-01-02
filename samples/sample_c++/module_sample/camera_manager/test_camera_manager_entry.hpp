@@ -73,8 +73,8 @@ static void *DjiUser_RunCameraManagerSampleTask(void *arg) {
                     returnCode = DjiCameraManager_SetOpticalZoomParam(mount_position, zoom_direction, factor);
                     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
                         USER_LOG_ERROR("camera manager set mode failed, errno = 0x%08llX", returnCode);
+                        result_msg = "camera manager set optical zoom failed,code"+ std::to_string(returnCode);
                     }
-                    result_msg = "camera manager set optical zoom failed,code"+ std::to_string(returnCode);
                 } catch (std::exception &exc) {
                     USER_LOG_ERROR("camera manager set optical zoom failed,%s", exc.what());
                     result_msg = "camera manager set optical zoom failed, " + std::string(exc.what());
