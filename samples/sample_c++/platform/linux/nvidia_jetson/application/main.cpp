@@ -31,6 +31,7 @@
 #include "flight_controller/test_flight_controller_command_flying.hpp"
 #include "gimbal/test_gimbal_entry_task.hpp"
 #include "camera_manager/test_camera_manager_entry.hpp"
+//#include "camera_emu/test_payload_cam_emu_base.hpp"
 
 /* Private constants ---------------------------------------------------------*/
 
@@ -63,6 +64,7 @@ int main(int argc, char **argv) {
 //        USER_LOG_ERROR("Create waypoint v3 task failed, errno = 0x%08llX", returnCode);
 //        return returnCode;
 //    }
+//    DjiTest_CameraEmuBaseStartServiceTask();
     returnCode = osalHandler->TaskCreate("s_flightControlTaskHandle",
                                          DjiUser_RunFlightControllerCommandFlyingSampleTask,
                                          4096, nullptr,
