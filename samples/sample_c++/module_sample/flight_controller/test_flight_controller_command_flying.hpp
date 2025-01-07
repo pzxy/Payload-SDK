@@ -82,9 +82,9 @@ static int gen_action(std::string method) {
         action = 9;
     } else if (method == "fc_execute_joystick_action") {
         action = 10;
-    }else if (method == "fc_arrest_flying") {
+    } else if (method == "fc_arrest_flying") {
         action = 11;
-    }else if (method == "fc_cancel_arrest_flying") {
+    } else if (method == "fc_cancel_arrest_flying") {
         action = 12;
     }
     return action;
@@ -105,6 +105,7 @@ static T_DjiFlightControllerJoystickMode joystickMode = {
 };
 
 static uint16_t s_inputFlag = 0;
+static bool flight_controller_flag = false;
 static dji_f32_t s_flyingSpeed = DJI_TEST_COMMAND_FLYING_CONTROL_SPEED_DEFAULT;
 static uint16_t s_goHomeAltitude = DJI_TEST_COMMAND_FLYING_GO_HOME_ALTITUDE;
 static char s_rcLostActionString[DJI_TEST_COMMAND_FLYING_RC_LOST_ACTION_STR_MAX_LEN] = {0};
@@ -192,10 +193,10 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
         int flag = true;
         std::string result_msg = "ok";
         int action = gen_action(method);
-        if (action ==0 ){
+        if (action == 0) {
             continue;
         }
-        cout << "flight control: "<<msg->get_topic() << ": " << msg->to_string() << endl;
+        cout << "flight control: " << msg->get_topic() << ": " << msg->to_string() << endl;
         switch (action) {
             case 1:
                 returnCode = DjiFlightController_ObtainJoystickCtrlAuthority();
@@ -255,13 +256,15 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
                 break;
             case 9:
                 try {
+                    flight_controller_flag = false;
                     nlohmann::json data = j["data"];
                     joystickMode.horizontalControlMode = data["horizontal_control_mode"];
                     joystickMode.verticalControlMode = data["vertical_control_mode"];
                     joystickMode.yawControlMode = data["yaw_control_mode"];
                     joystickMode.horizontalCoordinate = data["horizontal_coordinate"];
                     joystickMode.stableControlMode = data["stable_control_mode"];
-                    std::cout << "set mode:----->" << joystickMode.horizontalControlMode <<joystickMode.stableControlMode << std::endl;
+                    std::cout << "set mode:----->" << joystickMode.horizontalControlMode
+                              << joystickMode.stableControlMode << std::endl;
                     DjiFlightController_SetJoystickMode(joystickMode);
                 } catch (exception &exc) {
                     USER_LOG_ERROR("set control mode fail,%s", exc.what());
@@ -276,6 +279,7 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
                     s_flyingCommand.z = data["z"];
                     s_flyingCommand.yaw = data["yaw"];
                     s_inputFlag = 0;
+                    flight_controller_flag = true;
                 } catch (exception &exc) {
                     USER_LOG_ERROR("set control mode fail,%s", exc.what());
                     result_msg = "set control mode fail , " + std::string(exc.what());
@@ -419,18 +423,19 @@ static void *DjiUser_FlightControllerCommandFlyingTask(void *arg) {
     isCommandFlyingTaskStart = true;
     DjiFlightController_SetJoystickMode(joystickMode);
     while (true) {
+        osalHandler->TaskSleepMs(1000 / DJI_TEST_COMMAND_FLYING_CTRL_FREQ);
+        if (!flight_controller_flag) {
+            continue;
+        }
         s_inputFlag++;
-        if (s_inputFlag > 20) {
+        if (s_inputFlag > 25) {
             s_flyingCommand.x = 0;
             s_flyingCommand.y = 0;
             s_flyingCommand.z = 0;
             s_flyingCommand.yaw = 0;
             s_inputFlag = 0;
         }
-
         DjiUser_FlightControllerVelocityAndYawRateCtrl(s_flyingCommand);
-
-        osalHandler->TaskSleepMs(1000 / DJI_TEST_COMMAND_FLYING_CTRL_FREQ);
     }
 }
 
@@ -956,8 +961,8 @@ static T_DjiReturnCode DjiUser_FlightControlUpdateConfig(void) {
     if (isFirstUpdateConfig == false) {
         USER_LOG_INFO("Using current aircraft location, not use config home location.");
         s_gpsPosition = DjiUser_FlightControlGetValueOfGpsPosition();
-        std::cout << "y: " <<  s_gpsPosition.y << endl;
-        std::cout << "x: " <<  s_gpsPosition.x << endl;
+        std::cout << "y: " << s_gpsPosition.y << endl;
+        std::cout << "x: " << s_gpsPosition.x << endl;
 
         s_homeLocation.latitude = (dji_f64_t) s_gpsPosition.y / 10000000;
         s_homeLocation.longitude = (dji_f64_t) s_gpsPosition.x / 10000000;
