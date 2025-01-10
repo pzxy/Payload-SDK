@@ -83,10 +83,10 @@ static int gen_gimbal_action(std::string method) {
 static void *DjiUser_RunGimbalManagerSampleTask(void *arg);
 
 static void *DjiUser_RunGimbalManagerSampleTask(void *arg) {
-    const std::string SERVER_ADDRESS{"mqtt://47.97.201.247:1883"};
+    const std::string SERVER_ADDRESS{"mqtt://127.0.0.1:1883"};
     std::string CLIENT_ID = "psdk_async_consume_gimbal_2323423";
     const std::string TOPIC{"thing/edge/xxx/services"};
-    const int QOS = 2;
+    const int QOS = 1;
 
     T_DjiReturnCode returnCode;
     T_DjiDataTimestamp flightStatusTimestamp = {0};

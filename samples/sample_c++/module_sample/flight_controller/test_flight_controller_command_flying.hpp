@@ -86,6 +86,8 @@ static int gen_action(std::string method) {
         action = 11;
     } else if (method == "fc_cancel_arrest_flying") {
         action = 12;
+    }else if (method == "fc_start_or_stop") {
+        action = 13;
     }
     return action;
 }
@@ -168,10 +170,10 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
 //        USER_LOG_ERROR("Create status display task failed, errno = 0x%08llX", returnCode);
 //        return nullptr;
 //    }
-    const string SERVER_ADDRESS{"mqtt://47.97.201.247:1883"};
+    const string SERVER_ADDRESS{"mqtt://127.0.0.1:1883"};
     std::string CLIENT_ID = "psdk_async_consume_fc_0123456789";
     const string TOPIC{"thing/edge/xxx/services"};
-    const int QOS = 2;
+    const int QOS = 1;
     mqtt::async_client cli(SERVER_ADDRESS, CLIENT_ID);
     auto connOpts = mqtt::connect_options_builder()
             .clean_session(false)
@@ -256,7 +258,6 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
                 break;
             case 9:
                 try {
-                    flight_controller_flag = false;
                     nlohmann::json data = j["data"];
                     joystickMode.horizontalControlMode = data["horizontal_control_mode"];
                     joystickMode.verticalControlMode = data["vertical_control_mode"];
@@ -265,6 +266,7 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
                     joystickMode.stableControlMode = data["stable_control_mode"];
                     std::cout << "set mode:----->" << joystickMode.horizontalControlMode
                               << joystickMode.stableControlMode << std::endl;
+                    s_inputFlag = 25;
                     DjiFlightController_SetJoystickMode(joystickMode);
                 } catch (exception &exc) {
                     USER_LOG_ERROR("set control mode fail,%s", exc.what());
@@ -278,8 +280,7 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
                     s_flyingCommand.y = data["y"];
                     s_flyingCommand.z = data["z"];
                     s_flyingCommand.yaw = data["yaw"];
-                    s_inputFlag = 0;
-                    flight_controller_flag = true;
+                    s_inputFlag = 1;
                 } catch (exception &exc) {
                     USER_LOG_ERROR("set control mode fail,%s", exc.what());
                     result_msg = "set control mode fail , " + std::string(exc.what());
@@ -299,6 +300,15 @@ static void *DjiUser_RunFlightControllerCommandFlyingSampleTask(void *arg) {
                     result_msg = "cancel assert flying fail,code: " + std::to_string(returnCode);
                 }
                 break;
+//            case 13:
+//                nlohmann::json data = j["data"];
+//                int  action = data["action"];
+//                if (action ==1 ) {
+//                    flight_controller_flag = true;
+//                }else{
+//                    flight_controller_flag = false;
+//                }
+//                break;
             default:
                 flag = false;
                 USER_LOG_ERROR("invalid type");
@@ -424,7 +434,7 @@ static void *DjiUser_FlightControllerCommandFlyingTask(void *arg) {
     DjiFlightController_SetJoystickMode(joystickMode);
     while (true) {
         osalHandler->TaskSleepMs(1000 / DJI_TEST_COMMAND_FLYING_CTRL_FREQ);
-        if (!flight_controller_flag) {
+        if (s_inputFlag <1 || s_inputFlag>25) {
             continue;
         }
         s_inputFlag++;
@@ -434,6 +444,9 @@ static void *DjiUser_FlightControllerCommandFlyingTask(void *arg) {
             s_flyingCommand.z = 0;
             s_flyingCommand.yaw = 0;
             s_inputFlag = 0;
+        }
+        if (s_inputFlag <1 || s_inputFlag>25) {
+            continue;
         }
         DjiUser_FlightControllerVelocityAndYawRateCtrl(s_flyingCommand);
     }
