@@ -3,7 +3,7 @@
     "desc_cn": "失控行为",
     "desc_en": "rc lost action",
     "desc_range": "go_home/hover/landing",
-    "value": "go_home"
+    "value": "hover"
   },
   "go_home_altitude": {
     "desc_cn": "返航高度",
@@ -39,13 +39,13 @@
     "desc_cn": "水平视觉避障开关",
     "desc_en": "Horizontal Visual Avoidance",
     "desc_range": "true/false",
-    "value": "false"
+    "value": "true"
   },
   "HorizontalRadarObstacleAvoidanceEnable": {
     "desc_cn": "水平TOF避障开关",
     "desc_en": "Horizontal TOF Avoidance",
     "desc_range": "true/false",
-    "value": "false"
+    "value": "true"
   },
   "UpwardsVisualObstacleAvoidanceEnable": {
     "desc_cn": "上视觉避障开关",

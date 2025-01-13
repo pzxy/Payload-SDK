@@ -581,6 +581,9 @@ static void DjiUser_FlightControllerVelocityAndYawRateCtrl(T_DjiFlightController
     T_DjiReturnCode returnCode;
 
     USER_LOG_DEBUG("Joystick command: %.2f %.2f %.2f", command.x, command.y, command.z);
+    if (s_inputFlag <1 || s_inputFlag>25) {
+        return;
+    }
     returnCode = DjiFlightController_ExecuteJoystickAction(command);
     if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
         USER_LOG_ERROR("Execute joystick command failed, errno = 0x%08llX", returnCode);
@@ -876,19 +879,19 @@ static T_DjiReturnCode DjiUser_FlightControlUpdateConfig(void) {
         return DJI_ERROR_SYSTEM_MODULE_CODE_UNKNOWN;
     }
 
-    jsonItem = cJSON_GetObjectItem(jsonRoot, "go_home_altitude");
-    if (jsonItem != nullptr) {
-        jsonValue = cJSON_GetObjectItem(jsonItem, "value");
-        if (jsonValue != nullptr) {
-            USER_LOG_INFO("Get go home altitude is [%.2f]", jsonValue->valuedouble);
-            s_goHomeAltitude = (uint16_t) jsonValue->valuedouble;
-            returnCode = DjiFlightController_SetGoHomeAltitude((uint16_t) jsonValue->valuedouble);
-            if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-                USER_LOG_ERROR("Set go home altitude failed, errno = 0x%08llX", returnCode);
-                return returnCode;
-            }
-        }
-    }
+//    jsonItem = cJSON_GetObjectItem(jsonRoot, "go_home_altitude");
+//    if (jsonItem != nullptr) {
+//        jsonValue = cJSON_GetObjectItem(jsonItem, "value");
+//        if (jsonValue != nullptr) {
+//            USER_LOG_INFO("Get go home altitude is [%.2f]", jsonValue->valuedouble);
+//            s_goHomeAltitude = (uint16_t) jsonValue->valuedouble;
+//            returnCode = DjiFlightController_SetGoHomeAltitude((uint16_t) jsonValue->valuedouble);
+//            if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//                USER_LOG_ERROR("Set go home altitude failed, errno = 0x%08llX", returnCode);
+//                return returnCode;
+//            }
+//        }
+//    }
 
     if (aircraftInfoBaseInfo.aircraftSeries != DJI_AIRCRAFT_SERIES_M300) {
         jsonItem = cJSON_GetObjectItem(jsonRoot, "rc_lost_action");
@@ -931,71 +934,71 @@ static T_DjiReturnCode DjiUser_FlightControlUpdateConfig(void) {
         }
     }
 
-    jsonItem = cJSON_GetObjectItem(jsonRoot, "rtk_enable");
-    if (jsonItem != nullptr) {
-        jsonValue = cJSON_GetObjectItem(jsonItem, "value");
-        if (jsonValue != nullptr) {
-            USER_LOG_INFO("Get rtk enable is [%s]", jsonValue->valuestring);
-            if (strcmp(jsonValue->valuestring, "true") == 0) {
-                returnCode = DjiFlightController_SetRtkPositionEnableStatus(DJI_FLIGHT_CONTROLLER_ENABLE_RTK_POSITION);
-                if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-                    USER_LOG_ERROR("Set rtk enable failed, errno = 0x%08llX", returnCode);
-                    return returnCode;
-                }
-            } else if (strcmp(jsonValue->valuestring, "false") == 0) {
-                returnCode = DjiFlightController_SetRtkPositionEnableStatus(DJI_FLIGHT_CONTROLLER_DISABLE_RTK_POSITION);
-                if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-                    USER_LOG_ERROR("Set rtk enable failed, errno = 0x%08llX", returnCode);
-                    return returnCode;
-                }
-            } else {
-                USER_LOG_ERROR("Invalid value: %s", jsonValue->valuestring);
-            }
-        }
-    }
+//    jsonItem = cJSON_GetObjectItem(jsonRoot, "rtk_enable");
+//    if (jsonItem != nullptr) {
+//        jsonValue = cJSON_GetObjectItem(jsonItem, "value");
+//        if (jsonValue != nullptr) {
+//            USER_LOG_INFO("Get rtk enable is [%s]", jsonValue->valuestring);
+//            if (strcmp(jsonValue->valuestring, "true") == 0) {
+//                returnCode = DjiFlightController_SetRtkPositionEnableStatus(DJI_FLIGHT_CONTROLLER_ENABLE_RTK_POSITION);
+//                if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//                    USER_LOG_ERROR("Set rtk enable failed, errno = 0x%08llX", returnCode);
+//                    return returnCode;
+//                }
+//            } else if (strcmp(jsonValue->valuestring, "false") == 0) {
+//                returnCode = DjiFlightController_SetRtkPositionEnableStatus(DJI_FLIGHT_CONTROLLER_DISABLE_RTK_POSITION);
+//                if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//                    USER_LOG_ERROR("Set rtk enable failed, errno = 0x%08llX", returnCode);
+//                    return returnCode;
+//                }
+//            } else {
+//                USER_LOG_ERROR("Invalid value: %s", jsonValue->valuestring);
+//            }
+//        }
+//    }
 
-    jsonItem = cJSON_GetObjectItem(jsonRoot, "home_point_latitude");
-    if (jsonItem != nullptr) {
-        jsonValue = cJSON_GetObjectItem(jsonItem, "value");
-        if (jsonValue != nullptr) {
-            USER_LOG_INFO("Get home_point_latitude  is [%.2f]", jsonValue->valuedouble);
-            s_homeLocation.latitude = jsonValue->valuedouble;
-        }
-    }
-    jsonItem = cJSON_GetObjectItem(jsonRoot, "home_point_longitude");
-    if (jsonItem != nullptr) {
-        jsonValue = cJSON_GetObjectItem(jsonItem, "value");
-        if (jsonValue != nullptr) {
-            USER_LOG_INFO("Get home_point_longitude is [%.2f]", jsonValue->valuedouble);
-            s_homeLocation.longitude = jsonValue->valuedouble;
-        }
-    }
+//    jsonItem = cJSON_GetObjectItem(jsonRoot, "home_point_latitude");
+//    if (jsonItem != nullptr) {
+//        jsonValue = cJSON_GetObjectItem(jsonItem, "value");
+//        if (jsonValue != nullptr) {
+//            USER_LOG_INFO("Get home_point_latitude  is [%.2f]", jsonValue->valuedouble);
+//            s_homeLocation.latitude = jsonValue->valuedouble;
+//        }
+//    }
+//    jsonItem = cJSON_GetObjectItem(jsonRoot, "home_point_longitude");
+//    if (jsonItem != nullptr) {
+//        jsonValue = cJSON_GetObjectItem(jsonItem, "value");
+//        if (jsonValue != nullptr) {
+//            USER_LOG_INFO("Get home_point_longitude is [%.2f]", jsonValue->valuedouble);
+//            s_homeLocation.longitude = jsonValue->valuedouble;
+//        }
+//    }
 
-    if (isFirstUpdateConfig == false) {
-        USER_LOG_INFO("Using current aircraft location, not use config home location.");
-        s_gpsPosition = DjiUser_FlightControlGetValueOfGpsPosition();
-        std::cout << "y: " << s_gpsPosition.y << endl;
-        std::cout << "x: " << s_gpsPosition.x << endl;
+//    if (isFirstUpdateConfig == false) {
+//        USER_LOG_INFO("Using current aircraft location, not use config home location.");
+//        s_gpsPosition = DjiUser_FlightControlGetValueOfGpsPosition();
+//        std::cout << "y: " << s_gpsPosition.y << endl;
+//        std::cout << "x: " << s_gpsPosition.x << endl;
+//
+//        s_homeLocation.latitude = (dji_f64_t) s_gpsPosition.y / 10000000;
+//        s_homeLocation.longitude = (dji_f64_t) s_gpsPosition.x / 10000000;
 
-        s_homeLocation.latitude = (dji_f64_t) s_gpsPosition.y / 10000000;
-        s_homeLocation.longitude = (dji_f64_t) s_gpsPosition.x / 10000000;
-
-        returnCode = DjiFlightController_SetHomeLocationUsingCurrentAircraftLocation();
-        if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-            USER_LOG_ERROR("Set home location failed, errno = 0x%08llX", returnCode);
-        }
-        isFirstUpdateConfig = true;
-    } else {
-        T_DjiFlightControllerHomeLocation homeLocation;
-        homeLocation.latitude = s_homeLocation.latitude * DJI_PI / 180;
-        homeLocation.longitude = s_homeLocation.longitude * DJI_PI / 180;
-
-        returnCode = DjiFlightController_SetHomeLocationUsingGPSCoordinates(homeLocation);
-        if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
-            USER_LOG_ERROR("Set home location failed, errno = 0x%08llX", returnCode);
-            return returnCode;
-        }
-    }
+//        returnCode = DjiFlightController_SetHomeLocationUsingCurrentAircraftLocation();
+//        if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//            USER_LOG_ERROR("Set home location failed, errno = 0x%08llX", returnCode);
+//        }
+//        isFirstUpdateConfig = true;
+//    }else {
+//        T_DjiFlightControllerHomeLocation homeLocation;
+//        homeLocation.latitude = s_homeLocation.latitude * DJI_PI / 180;
+//        homeLocation.longitude = s_homeLocation.longitude * DJI_PI / 180;
+//
+//        returnCode = DjiFlightController_SetHomeLocationUsingGPSCoordinates(homeLocation);
+//        if (returnCode != DJI_ERROR_SYSTEM_MODULE_CODE_SUCCESS) {
+//            USER_LOG_ERROR("Set home location failed, errno = 0x%08llX", returnCode);
+//            return returnCode;
+//        }
+//    }
 
     jsonItem = cJSON_GetObjectItem(jsonRoot, "HorizontalVisualObstacleAvoidanceEnable");
     if (jsonItem != nullptr) {
